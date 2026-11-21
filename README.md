@@ -1,7 +1,7 @@
 # BHTypes
 
-**Plain data types for a borehole heat exchanger's cross-section**: `Soil`, `Grout`, and the
-pipe geometries `SingleUTube`, `DoubleUTube` and `Coaxial`, plus converters to the conventions
+**Plain data types for borehole heat exchangers**: `Soil`, `Grout`, the pipe geometries
+`SingleUTube`, `DoubleUTube` and `Coaxial`, and the `Borehole`, plus converters to the conventions
 of [pygfunction](https://github.com/MassimoCimmino/pygfunction),
 [bhresist](https://pypi.org/project/bhresist/) and
 [GHEDesigner](https://github.com/BETSRG/GHEDesigner). No dependencies.
@@ -44,10 +44,29 @@ pipe = pipe_from_ghedesigner(config["pipe"])
 config["pipe"] = to_ghedesigner(pipe)
 ```
 
+## Boreholes
+
+A `Borehole` is the hole itself: its length and diameter, the same wherever it is drilled.
+Where it is placed -- position, buried depth, tilt, orientation -- belongs to the bore field
+and is given to the package that models the field:
+
+```python
+from bhtypes import Borehole
+
+borehole = Borehole(length_m=210.0, diameter_m=0.1524)
+
+gt.boreholes.Borehole(D=4.0, x=0.0, y=0.0, **to_pygfunction(borehole))              # H, r_b
+gt.borefield.Borefield.rectangle_field(4, 3, 6.0, 6.0, D=4.0, **to_pygfunction(borehole))
+getattr(bh, init_method(pipe))(..., **to_bhresist(borehole))   # length, borehole_diameter
+```
+
+GHEDesigner keeps the borehole diameter with the buried depth (its `borehole` block) and the
+length with the field (`pre_designed`), so a `Borehole` has no GHEDesigner conversion.
+
 ## Layout
 
-The types (`bhtypes.materials`, `bhtypes.pipes`) are plain data: fields, validation and
-derived geometry, with no knowledge of any other package. Each conversion lives in
+The types (`bhtypes.materials`, `bhtypes.pipes`, `bhtypes.borehole`) are plain data:
+fields, validation and derived geometry, with no knowledge of any other package. Each conversion lives in
 `bhtypes.convert.<package>`:
 
 | Module | Functions |
@@ -84,10 +103,11 @@ pip install bhtypes
 ## Scope
 
 - **In:** soil and grout thermal properties; single U-tube, double U-tube (explicit inlet
-  arrangement and parallel/series flow) and coaxial pipe geometry; converters.
+  arrangement and parallel/series flow) and coaxial pipe geometry; the borehole's length and
+  diameter; converters.
 - **Out:** fluids -- use [SecondaryCoolantProps](https://pypi.org/project/SecondaryCoolantProps/)
-  (`scp`), which pygfunction, bhresist and GHEDesigner already share; borehole geometry -- use
-  `pygfunction.boreholes.Borehole`.
+  (`scp`), which pygfunction, bhresist and GHEDesigner already share; bore fields
+  (positions, buried depths, tilts, orientations).
 
 ## Conventions
 
@@ -106,10 +126,3 @@ what GHEDesigner passes to pygfunction and bhresist bit for bit.
 Converters refuse what the target package cannot represent rather than approximating it:
 bhresist has no series double U-tube model, and GHEDesigner input files have no diagonal
 double U-tube, no annulus-inlet coaxial and no per-pipe coaxial heat capacity.
-
-## Development
-
-```bash
-uv sync
-uv run pytest   # GHEDesigner comparisons skip unless GHEDesigner is installed
-```

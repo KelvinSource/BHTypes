@@ -5,7 +5,9 @@
 
     bh = bhr.borehole.Borehole()
     getattr(bh, init_method(pipe))(**to_bhresist(pipe), **to_bhresist(grout), **to_bhresist(soil),
-                                   borehole_diameter=0.1524, length=200.0, fluid=fluid)
+                                   **to_bhresist(borehole), fluid=fluid)
+
+For a :class:`~bhtypes.Borehole` it gives ``length`` and ``borehole_diameter``.
 
 bhresist has no series double U-tube model, so those are refused rather than computed as
 parallel.
@@ -15,6 +17,7 @@ from __future__ import annotations
 
 from functools import singledispatch
 
+from bhtypes.borehole import Borehole
 from bhtypes.convert import _unsupported
 from bhtypes.materials import Grout, Soil
 from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
@@ -24,6 +27,11 @@ from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
 def to_bhresist(obj) -> dict:
     """Keyword arguments for bhresist (see the module docstring)."""
     raise _unsupported("bhresist", obj)
+
+
+@to_bhresist.register(Borehole)
+def _(borehole: Borehole) -> dict:
+    return {"length": borehole.length_m, "borehole_diameter": borehole.diameter_m}
 
 
 @to_bhresist.register(Soil)

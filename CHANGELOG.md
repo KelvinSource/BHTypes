@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.2.0
+
+- `Borehole` (length and diameter), with converters: `to_pygfunction` gives the `H` and `r_b`
+  of pygfunction's `Borehole` and field constructors, `to_bhresist` the `length` and
+  `borehole_diameter`.
+
+## 0.1.0
 
 First release.
 

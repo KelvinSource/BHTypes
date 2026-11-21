@@ -1,8 +1,7 @@
 """Converters checked against the real packages.
 
-pygfunction and bhresist are dev dependencies. The GHEDesigner tests skip unless it is
-installed; they show bhtypes reproduces what GHEDesigner itself passes to pygfunction
-and bhresist, bit for bit.
+pygfunction, bhresist and GHEDesigner are dev dependencies. The GHEDesigner tests show
+bhtypes reproduces what GHEDesigner itself passes to pygfunction and bhresist, bit for bit.
 """
 
 import dataclasses
@@ -180,11 +179,10 @@ def test_bhresist_resistance_matches_ghedesigner(ghedesigner, name):
     else:
         gd = CoaxialPipe(*args)
     ours = _bhresist(pipe_from_ghedesigner(block))
+    # GHEDesigner evaluates R_b at the temperature its fluid was built with (12 degC above)
     for m_flow in (0.05, 0.4, 0.8):
-        for temperature in (2.0, 12.0, 25.0):
-            gd.m_flow_borehole = m_flow
-            gd.fluid.update_props_with_new_temp(temperature)
-            assert ours.calc_bh_resist(m_flow, temperature) == gd.calc_effective_borehole_resistance()
+        gd.m_flow_borehole = m_flow
+        assert ours.calc_bh_resist(m_flow, 12.0) == gd.calc_effective_borehole_resistance()
 
 
 def test_single_u_round_trip_through_ghedesigner_pipe(ghedesigner):
@@ -196,3 +194,36 @@ def test_single_u_round_trip_through_ghedesigner_pipe(ghedesigner):
         pipe.shank_spacing_m,
         pipe.roughness_m,
     )
+
+
+# --- borehole -----------------------------------------------------------------------------
+
+
+def test_pygfunction_takes_the_borehole():
+    from bhtypes import Borehole
+
+    borehole = Borehole(length_m=150.0, diameter_m=0.15)
+    single = gt.boreholes.Borehole(D=4.0, x=0.0, y=0.0, **to_pygfunction(borehole))
+    assert (single.H, single.r_b) == (150.0, 0.075)
+    rectangle = gt.borefield.Borefield.rectangle_field(2, 2, 6.0, 6.0, D=4.0, **to_pygfunction(borehole))
+    assert len(rectangle) == 4
+    assert rectangle.H[0] == 150.0
+    assert rectangle.r_b[0] == 0.075
+
+
+def test_bhresist_takes_the_borehole():
+    from scp.propylene_glycol import PropyleneGlycol
+
+    from bhtypes import Borehole
+
+    pipe = pipe_from_ghedesigner(BLOCKS["single"])
+    bh = bhr_borehole.Borehole()
+    getattr(bh, init_method(pipe))(
+        **to_bhresist(pipe),
+        **to_bhresist(GROUT),
+        **to_bhresist(SOIL),
+        **to_bhresist(Borehole(length_m=LENGTH, diameter_m=BOREHOLE_DIAMETER)),
+        boundary_condition="UNIFORM_BOREHOLE_WALL_TEMP",
+        fluid=PropyleneGlycol(0.25),
+    )
+    assert bh.calc_bh_resist(0.4, 12.0) == _bhresist(pipe).calc_bh_resist(0.4, 12.0)

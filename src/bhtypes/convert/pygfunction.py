@@ -5,6 +5,11 @@
     gt.pipes.MultipleUTube(**to_pygfunction(pipe), **to_pygfunction(soil), **to_pygfunction(grout),
                            borehole=borehole, R_fp=R_fp)
 
+For a :class:`~bhtypes.Borehole` it gives the ``H`` and ``r_b`` of pygfunction's ``Borehole`` and
+field constructors; the buried depth and positions are given there::
+
+    field = gt.borefield.Borefield.rectangle_field(4, 3, 6.0, 6.0, D=4.0, **to_pygfunction(borehole))
+
 Pass ``soil.thermal_diffusivity_m2_per_s`` as ``alpha`` to pygfunction's g-functions, and
 :func:`pipe_type` as ``pipe_type_str`` to ``gFunction.from_static_params``.
 """
@@ -13,6 +18,7 @@ from __future__ import annotations
 
 from functools import singledispatch
 
+from bhtypes.borehole import Borehole
 from bhtypes.convert import _unsupported
 from bhtypes.materials import Grout, Soil
 from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
@@ -22,6 +28,12 @@ from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
 def to_pygfunction(obj) -> dict:
     """Keyword arguments for pygfunction (see the module docstring)."""
     raise _unsupported("pygfunction", obj)
+
+
+@to_pygfunction.register(Borehole)
+def _(borehole: Borehole) -> dict:
+    """``H`` and ``r_b`` for pygfunction's ``Borefield`` constructors and ``Borehole`` (give ``D`` there)."""
+    return {"H": borehole.length_m, "r_b": borehole.radius_m}
 
 
 @to_pygfunction.register(Soil)
