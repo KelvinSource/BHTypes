@@ -1,0 +1,52 @@
+[build-system]
+requires = ["uv_build>=0.11.0,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "bhtypes"
+version = "0.1.0"
+description = "Dependency-free, shared data types for borehole definitions used in ground heat exchanger software, with converters to pygfunction, bhresist and GHEDesigner."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Jack C. Cook" }]
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+dependencies = []  # deliberately none
+keywords = ["geothermal", "borehole", "ground heat exchanger", "U-tube", "coaxial", "pygfunction", "GHEDesigner"]
+
+[project.urls]
+Homepage = "https://github.com/KelvinSource/BHTypes"
+Repository = "https://github.com/KelvinSource/BHTypes"
+Issues = "https://github.com/KelvinSource/BHTypes/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff",
+    # Only for tests that check the converters against the real packages.
+    "bhresist>=0.4",
+    "pygfunction>=2.3.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = ["B", "C4", "I", "N", "PT", "RUF", "SIM", "UP"]
