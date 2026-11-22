@@ -13,19 +13,19 @@ from bhtypes._checks import positive
 
 @dataclass(frozen=True, slots=True)
 class Soil:
-    """The ground around the borehole.
+    """The ground around the borehole: its thermal properties.
+
+    The undisturbed ground temperature is a condition of the site, not of the soil, and is left
+    to the tools that simulate one.
 
     Attributes
     ----------
     thermal_conductivity_w_per_m_k : float
     volumetric_heat_capacity_j_per_m3_k : float
-    undisturbed_temperature_c : float
-        Far-field (undisturbed) ground temperature.
     """
 
     thermal_conductivity_w_per_m_k: float
     volumetric_heat_capacity_j_per_m3_k: float
-    undisturbed_temperature_c: float
 
     def __post_init__(self) -> None:
         positive("thermal_conductivity_w_per_m_k", self.thermal_conductivity_w_per_m_k)

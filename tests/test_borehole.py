@@ -6,7 +6,6 @@ import pytest
 
 from bhtypes import Borehole
 from bhtypes.convert.bhresist import to_bhresist
-from bhtypes.convert.ghedesigner import to_ghedesigner
 from bhtypes.convert.pygfunction import to_pygfunction
 
 BOREHOLE = Borehole(length_m=210.31, diameter_m=0.1524)
@@ -30,9 +29,3 @@ def test_pygfunction():
 
 def test_bhresist():
     assert to_bhresist(BOREHOLE) == {"length": 210.31, "borehole_diameter": 0.1524}
-
-
-def test_ghedesigner_has_no_lone_borehole():
-    """GHEDesigner's ``borehole`` block holds the buried depth, and the length is in ``pre_designed``."""
-    with pytest.raises(TypeError, match="no GHEDesigner conversion for Borehole"):
-        to_ghedesigner(BOREHOLE)

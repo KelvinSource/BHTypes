@@ -46,10 +46,10 @@ def _(grout: Grout) -> dict:
 
 def _u_tube(pipe: SingleUTube | DoubleUTube) -> dict:
     return {
-        "pipe_outer_diameter": pipe.outer_diameter_m,
-        "pipe_dimension_ratio": pipe.dimension_ratio,
-        "shank_space": pipe.leg_offset_m,  # bhresist: borehole axis to leg centre
-        "pipe_conductivity": pipe.thermal_conductivity_w_per_m_k,
+        "pipe_outer_diameter": pipe.tube.outer_diameter_m,
+        "pipe_dimension_ratio": pipe.tube.dimension_ratio,
+        "shank_space": pipe.leg_offset_m,  # bhresist: borehole axis to leg center
+        "pipe_conductivity": pipe.tube.thermal_conductivity_w_per_m_k,
     }
 
 
@@ -68,12 +68,12 @@ def _(pipe: DoubleUTube) -> dict:
 @to_bhresist.register(Coaxial)
 def _(pipe: Coaxial) -> dict:
     return {
-        "outer_pipe_outer_diameter": pipe.outer_pipe_outer_diameter_m,
-        "outer_pipe_dimension_ratio": pipe.outer_pipe_dimension_ratio,
-        "outer_pipe_conductivity": pipe.outer_pipe_thermal_conductivity_w_per_m_k,
-        "inner_pipe_outer_diameter": pipe.inner_pipe_outer_diameter_m,
-        "inner_pipe_dimension_ratio": pipe.inner_pipe_dimension_ratio,
-        "inner_pipe_conductivity": pipe.inner_pipe_thermal_conductivity_w_per_m_k,
+        "outer_pipe_outer_diameter": pipe.outer.outer_diameter_m,
+        "outer_pipe_dimension_ratio": pipe.outer.dimension_ratio,
+        "outer_pipe_conductivity": pipe.outer.thermal_conductivity_w_per_m_k,
+        "inner_pipe_outer_diameter": pipe.center.outer_diameter_m,
+        "inner_pipe_dimension_ratio": pipe.center.dimension_ratio,
+        "inner_pipe_conductivity": pipe.center.thermal_conductivity_w_per_m_k,
     }
 
 

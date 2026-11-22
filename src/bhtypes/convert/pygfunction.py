@@ -49,7 +49,7 @@ def _(grout: Grout) -> dict:
 @to_pygfunction.register(SingleUTube)
 def _(pipe: SingleUTube) -> dict:
     """``pos``, ``r_in``, ``r_out`` for ``pygfunction.pipes.SingleUTube``."""
-    return {"pos": pipe.leg_positions(), "r_in": pipe.inner_radius_m, "r_out": pipe.outer_radius_m}
+    return {"pos": pipe.leg_positions(), "r_in": pipe.tube.inner_radius_m, "r_out": pipe.tube.outer_radius_m}
 
 
 @to_pygfunction.register(DoubleUTube)
@@ -57,8 +57,8 @@ def _(pipe: DoubleUTube) -> dict:
     """``pos`` (inlets first), ``r_in``, ``r_out``, ``nPipes``, ``config`` for ``pygfunction.pipes.MultipleUTube``."""
     return {
         "pos": pipe.leg_positions(),
-        "r_in": pipe.inner_radius_m,
-        "r_out": pipe.outer_radius_m,
+        "r_in": pipe.tube.inner_radius_m,
+        "r_out": pipe.tube.outer_radius_m,
         "nPipes": 2,
         "config": pipe.flow,
     }
@@ -78,13 +78,9 @@ def _(pipe: Coaxial) -> dict:
 
 
 def coaxial_radii(pipe: Coaxial) -> tuple[tuple[float, float], tuple[float, float]]:
-    """``(r_in, r_out)`` in pygfunction's order: the inlet pipe first, then the outlet pipe."""
-    first, second = (
-        (pipe.inner_pipe_radii_m, pipe.outer_pipe_radii_m)
-        if pipe.inlet == "centre"
-        else (pipe.outer_pipe_radii_m, pipe.inner_pipe_radii_m)
-    )
-    return (first[0], second[0]), (first[1], second[1])
+    """``(r_in, r_out)`` in pygfunction's order: the inlet tube first, then the outlet tube."""
+    first, second = (pipe.center, pipe.outer) if pipe.inlet == "center" else (pipe.outer, pipe.center)
+    return (first.inner_radius_m, second.inner_radius_m), (first.outer_radius_m, second.outer_radius_m)
 
 
 @singledispatch
@@ -105,4 +101,4 @@ def _(pipe: DoubleUTube) -> str:
 
 @pipe_type.register(Coaxial)
 def _(pipe: Coaxial) -> str:
-    return "COAXIAL_ANNULAR_OUT" if pipe.inlet == "centre" else "COAXIAL_ANNULAR_IN"
+    return "COAXIAL_ANNULAR_OUT" if pipe.inlet == "center" else "COAXIAL_ANNULAR_IN"

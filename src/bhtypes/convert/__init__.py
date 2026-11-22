@@ -1,13 +1,14 @@
-"""Conversions between bhtypes and other packages' conventions, one module per package.
+"""Conversions from bhtypes to the computational packages' conventions, one module per package.
 
 =================================  ==========================================================
 :mod:`bhtypes.convert.pygfunction`  ``to_pygfunction``: keyword arguments for pygfunction's
                                      pipe models; ``pipe_type``: its ``pipe_type_str``
 :mod:`bhtypes.convert.bhresist`     ``to_bhresist``: keyword arguments for bhresist's
                                      ``Borehole.init_*_borehole``; ``init_method``: which one
-:mod:`bhtypes.convert.ghedesigner`  ``to_ghedesigner`` / ``*_from_ghedesigner``: GHEDesigner
-                                     input-file blocks
 =================================  ==========================================================
+
+Reading and writing an application's input files (e.g. GHEDesigner's) belongs to that
+application, not here.
 
 Import the functions rather than the modules, so the module names do not shadow the
 packages themselves::

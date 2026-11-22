@@ -4,8 +4,8 @@ build-backend = "uv_build"
 
 [project]
 name = "bhtypes"
-version = "0.2.0"
-description = "Dependency-free, shared data types for borehole definitions used in ground heat exchanger software, with converters to pygfunction, bhresist and GHEDesigner."
+version = "0.3.0"
+description = "Dependency-free, shared data types for borehole definitions used in ground heat exchanger software, with converters to pygfunction and bhresist."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -25,7 +25,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = []  # deliberately none
-keywords = ["geothermal", "borehole", "ground heat exchanger", "U-tube", "coaxial", "pygfunction", "GHEDesigner"]
+keywords = ["geothermal", "borehole", "ground heat exchanger", "U-tube", "coaxial", "pygfunction", "bhresist"]
 
 [project.urls]
 Homepage = "https://github.com/KelvinSource/BHTypes"
@@ -38,7 +38,6 @@ dev = [
     "ruff",
     # Only for tests that check the converters against the real packages.
     "bhresist>=0.4",
-    "ghedesigner>=2.1.1",
     "pygfunction>=2.3.1",
 ]
 
