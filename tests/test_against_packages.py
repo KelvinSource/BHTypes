@@ -107,3 +107,30 @@ def test_bhresist_takes_the_borehole():
         fluid=PropyleneGlycol(0.25),
     )
     assert bh.calc_bh_resist(0.4, 12.0) == _bhresist(pipe).calc_bh_resist(0.4, 12.0)
+
+
+# --- heat exchanger -----------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("name", list(PIPES))
+def test_heat_exchanger_initialises_bhresist_in_one_call(name):
+    from scp.propylene_glycol import PropyleneGlycol
+
+    from bhtypes import Borehole, BoreholeHeatExchanger
+
+    bhe = BoreholeHeatExchanger(Borehole(LENGTH, BOREHOLE_DIAMETER), PIPES[name], GROUT, SOIL)
+    bh = bhr_borehole.Borehole()
+    getattr(bh, init_method(bhe))(
+        **to_bhresist(bhe), fluid=PropyleneGlycol(0.25), boundary_condition="UNIFORM_BOREHOLE_WALL_TEMP"
+    )
+    assert bh.calc_bh_resist(0.4, 12.0) == _bhresist(PIPES[name]).calc_bh_resist(0.4, 12.0)
+
+
+def test_heat_exchanger_builds_pygfunction_pipes():
+    from bhtypes import Borehole, BoreholeHeatExchanger
+
+    borehole = Borehole(LENGTH, BOREHOLE_DIAMETER)
+    bhe = BoreholeHeatExchanger(borehole, PIPES["double_parallel"], GROUT, SOIL)
+    pyg_borehole = gt.boreholes.Borehole(D=4.0, x=0.0, y=0.0, **to_pygfunction(borehole))
+    model = gt.pipes.MultipleUTube(**to_pygfunction(bhe), borehole=pyg_borehole, R_fp=0.1)
+    assert model.local_borehole_thermal_resistance() > 0

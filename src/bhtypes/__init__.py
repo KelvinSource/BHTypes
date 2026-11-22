@@ -1,7 +1,7 @@
 """bhtypes: plain data types for borehole heat exchangers.
 
 ``Soil``, ``Grout``, a pipe (``Tube``) and its arrangements ``SingleUTube``, ``DoubleUTube`` and
-``Coaxial``, and the ``Borehole`` (length and diameter), as frozen dataclasses with units in their field names.
+``Coaxial``, the ``Borehole`` (length and diameter), and the ``BoreholeHeatExchanger`` that combines them, as frozen dataclasses with units in their field names.
 No dependencies.
 
 Conversions to the conventions of the computational packages pygfunction and bhresist live in
@@ -13,7 +13,7 @@ pygfunction and bhresist already share -- and bore fields (positions, buried
 depths, tilts, orientations).
 """
 
-from bhtypes.borehole import Borehole
+from bhtypes.borehole import Borehole, BoreholeHeatExchanger
 from bhtypes.materials import Grout, Soil
 from bhtypes.pipes import (
     COAXIAL_INLETS,
@@ -33,6 +33,7 @@ __all__ = [
     "DOUBLE_U_FLOWS",
     "DOUBLE_U_INLETS",
     "Borehole",
+    "BoreholeHeatExchanger",
     "Coaxial",
     "DoubleUTube",
     "Grout",

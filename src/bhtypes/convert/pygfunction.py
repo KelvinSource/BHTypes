@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from functools import singledispatch
 
-from bhtypes.borehole import Borehole
+from bhtypes.borehole import Borehole, BoreholeHeatExchanger
 from bhtypes.convert import _unsupported
 from bhtypes.materials import Grout, Soil
 from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
@@ -83,6 +83,17 @@ def coaxial_radii(pipe: Coaxial) -> tuple[tuple[float, float], tuple[float, floa
     return (first.inner_radius_m, second.inner_radius_m), (first.outer_radius_m, second.outer_radius_m)
 
 
+@to_pygfunction.register(BoreholeHeatExchanger)
+def _(bhe: BoreholeHeatExchanger) -> dict:
+    """The pipe, soil and grout arguments of pygfunction's pipe classes.
+
+    The borehole is not included: pygfunction's ``Borehole`` also needs the field's buried depth
+    and position (``borehole=gt.boreholes.Borehole(D=..., x=..., y=..., **to_pygfunction(bhe.borehole))``),
+    and ``R_fp`` depends on the flow.
+    """
+    return {**to_pygfunction(bhe.pipe), **to_pygfunction(bhe.soil), **to_pygfunction(bhe.grout)}
+
+
 @singledispatch
 def pipe_type(pipe) -> str:
     """pygfunction's ``pipe_type_str`` for ``gFunction.from_static_params``."""
@@ -102,3 +113,8 @@ def _(pipe: DoubleUTube) -> str:
 @pipe_type.register(Coaxial)
 def _(pipe: Coaxial) -> str:
     return "COAXIAL_ANNULAR_OUT" if pipe.inlet == "center" else "COAXIAL_ANNULAR_IN"
+
+
+@pipe_type.register(BoreholeHeatExchanger)
+def _(bhe: BoreholeHeatExchanger) -> str:
+    return pipe_type(bhe.pipe)

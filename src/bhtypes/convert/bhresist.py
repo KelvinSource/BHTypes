@@ -7,7 +7,10 @@
     getattr(bh, init_method(pipe))(**to_bhresist(pipe), **to_bhresist(grout), **to_bhresist(soil),
                                    **to_bhresist(borehole), fluid=fluid)
 
-For a :class:`~bhtypes.Borehole` it gives ``length`` and ``borehole_diameter``.
+For a :class:`~bhtypes.Borehole` it gives ``length`` and ``borehole_diameter``; for a
+:class:`~bhtypes.BoreholeHeatExchanger`, everything but the fluid and boundary condition::
+
+    getattr(bh, init_method(bhe))(**to_bhresist(bhe), fluid=fluid, boundary_condition=...)
 
 bhresist has no series double U-tube model, so those are refused rather than computed as
 parallel.
@@ -17,7 +20,7 @@ from __future__ import annotations
 
 from functools import singledispatch
 
-from bhtypes.borehole import Borehole
+from bhtypes.borehole import Borehole, BoreholeHeatExchanger
 from bhtypes.convert import _unsupported
 from bhtypes.materials import Grout, Soil
 from bhtypes.pipes import Coaxial, DoubleUTube, SingleUTube
@@ -77,6 +80,12 @@ def _(pipe: Coaxial) -> dict:
     }
 
 
+@to_bhresist.register(BoreholeHeatExchanger)
+def _(bhe: BoreholeHeatExchanger) -> dict:
+    """Every argument of ``init_*_borehole`` except the fluid and boundary condition."""
+    return {**to_bhresist(bhe.pipe), **to_bhresist(bhe.borehole), **to_bhresist(bhe.grout), **to_bhresist(bhe.soil)}
+
+
 @singledispatch
 def init_method(pipe) -> str:
     """Name of the bhresist ``Borehole`` method that takes :func:`to_bhresist`'s keyword arguments."""
@@ -96,3 +105,8 @@ def _(pipe: DoubleUTube) -> str:
 @init_method.register(Coaxial)
 def _(pipe: Coaxial) -> str:
     return "init_coaxial_borehole"
+
+
+@init_method.register(BoreholeHeatExchanger)
+def _(bhe: BoreholeHeatExchanger) -> str:
+    return init_method(bhe.pipe)

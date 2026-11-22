@@ -1,9 +1,10 @@
 # BHTypes
 
 Plain data types for what is inside a borehole heat exchanger -- `Soil`, `Grout`, a pipe
-(`Tube`), its arrangements `SingleUTube`, `DoubleUTube` and `Coaxial`, and the `Borehole` --
-with converters to the conventions of [pygfunction](https://github.com/MassimoCimmino/pygfunction)
-and [bhresist](https://pypi.org/project/bhresist/). No dependencies; SI units throughout.
+(`Tube`), its arrangements `SingleUTube`, `DoubleUTube` and `Coaxial`, the `Borehole`, and the
+`BoreholeHeatExchanger` that combines them -- with converters to the conventions of
+[pygfunction](https://github.com/MassimoCimmino/pygfunction) and
+[bhresist](https://pypi.org/project/bhresist/). No dependencies; SI units throughout.
 
 ```bash
 pip install bhtypes   # Python 3.11 or newer
@@ -18,7 +19,7 @@ import pygfunction as gt
 from bhr.borehole import Borehole as BhresistBorehole
 from scp.water import Water
 
-from bhtypes import Borehole, DoubleUTube, Grout, Soil, Tube
+from bhtypes import Borehole, BoreholeHeatExchanger, DoubleUTube, Grout, Soil, Tube
 from bhtypes.convert.bhresist import init_method, to_bhresist
 from bhtypes.convert.pygfunction import to_pygfunction
 
@@ -28,17 +29,15 @@ pipe = DoubleUTube(tube, shank_spacing_m=0.03404, inlets="adjacent", flow="paral
 borehole = Borehole(length_m=200.0, diameter_m=0.1524)
 grout = Grout(thermal_conductivity_w_per_m_k=2.4, volumetric_heat_capacity_j_per_m3_k=3.4e6)
 soil = Soil(thermal_conductivity_w_per_m_k=3.0, volumetric_heat_capacity_j_per_m3_k=2.6e6)
+bhe = BoreholeHeatExchanger(borehole, pipe, grout, soil)  # checks that the pipe fits in the borehole
 
 # pygfunction: position and buried depth belong to the field; R_fp comes from your convection model
-gt.pipes.MultipleUTube(**to_pygfunction(pipe), **to_pygfunction(soil), **to_pygfunction(grout),
-                       borehole=gt.boreholes.Borehole(D=4.0, x=0.0, y=0.0, **to_pygfunction(borehole)),
-                       R_fp=0.1)
+gt.pipes.MultipleUTube(**to_pygfunction(bhe), R_fp=0.1,
+                       borehole=gt.boreholes.Borehole(D=4.0, x=0.0, y=0.0, **to_pygfunction(borehole)))
 
 # bhresist: state the boundary condition (its default is uniform heat flux)
 bh = BhresistBorehole()
-getattr(bh, init_method(pipe))(**to_bhresist(pipe), **to_bhresist(borehole), **to_bhresist(grout),
-                               **to_bhresist(soil), fluid=Water(),
-                               boundary_condition="UNIFORM_BOREHOLE_WALL_TEMP")
+getattr(bh, init_method(bhe))(**to_bhresist(bhe), fluid=Water(), boundary_condition="UNIFORM_BOREHOLE_WALL_TEMP")
 ```
 
 A coaxial exchanger is two tubes: `Coaxial(center=Tube(...), outer=Tube(...), inlet="center")`.
@@ -71,8 +70,7 @@ input files.
 
 ## Status
 
-Pre-1.0: minor versions may change the API. See the [changelog](CHANGELOG.md) for migration
-notes.
+Pre-1.0: minor versions may change the API.
 
 ## License
 

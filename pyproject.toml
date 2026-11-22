@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "bhtypes"
-version = "0.3.0"
+version = "0.4.0"
 description = "Dependency-free, shared data types for borehole definitions used in ground heat exchanger software, with converters to pygfunction and bhresist."
 readme = "README.md"
 license = "MIT"

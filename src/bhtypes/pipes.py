@@ -13,7 +13,7 @@ in :mod:`bhtypes.convert`.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import cos, pi, sin
+from math import cos, pi, sin, sqrt
 
 from bhtypes._checks import choice, non_negative, positive, wall
 
@@ -135,6 +135,12 @@ class DoubleUTube(_UTube):
         _UTube.__post_init__(self)
         choice("inlets", self.inlets, DOUBLE_U_INLETS)
         choice("flow", self.flow, DOUBLE_U_FLOWS)
+        # neighbouring legs sit 90 degrees apart, sqrt(2) leg_offset_m between centers
+        if sqrt(2.0) * self.leg_offset_m < 2.0 * self.tube.outer_radius_m * (1.0 - 1e-12):
+            raise ValueError(
+                "neighbouring legs overlap: shank_spacing_m must be at least "
+                f"2 (sqrt(2) - 1) x tube outer radius = {2.0 * (sqrt(2.0) - 1.0) * self.tube.outer_radius_m:.6g} m"
+            )
 
     def leg_positions(self) -> list[tuple[float, float]]:
         """``[inlet, inlet, outlet, outlet]`` (x, y) [m], relative to the borehole axis."""
